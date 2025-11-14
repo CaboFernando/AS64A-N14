@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: as64a_n14
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      PORT: 3000
+      MONGO_URI: mongodb://mongo:27017/as64a_n14
+      JWT_SECRET: super_seguro_123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "3000:3000"
+    command: sh -c "node src/config/seed.js && node src/server.js"
+
+  frontend:
+    build:
+      context: ./frontend/TMDBapi-app
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:8080"
+
+volumes:
+  mongo_data:

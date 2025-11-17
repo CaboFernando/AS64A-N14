@@ -1,35 +1,60 @@
-# AS64A-N14
- Repositório utilizado para entrega do projeto 2 da disciplina AS64A-N14
+# AS64A-N14 – Projeto 2
 
+Este repositório entrega:
+- SPA React (TMDBapi-app) adaptada para Login, Busca e Inserção em dados locais.
+- Backend Express (REST) com MongoDB e Redis (cache + revogação de tokens).
+- Segurança: JWT, hashing de senha, rate limit, helmet, validação servidor.
+- Otimização: compressão, cache, estrutura REST.
+- Execução via Docker Compose ou local.
 
-# Backend - Projeto 2 (AS64A-N14)
+## Serviços
 
-Implementa:
-- Login / Logout (JWT + revogação via Redis)
-- Busca e Inserção de filmes (autenticado)
-- Cache de buscas (Redis)
-- Segurança: helmet, rate limit, hash de senha
-- Logging (coleção logs)
-- Compressão de respostas
+| Serviço   | Porta | Função                    |
+|-----------|-------|---------------------------|
+| backend   | 3000  | API REST (login, filmes)  |
+| frontend  | 8080  | SPA (Nginx)               |
+| mongo     | 27017 | Banco de dados            |
+| redis     | 6379  | Cache / revogação tokens  |
 
-## Endpoints
-POST /api/login  
-POST /api/logout  
-GET /api/filmes?query=&ano=  
-POST /api/filmes  
-GET /api/health
+## Endpoints Principais
 
-## Execução Local
-1. Criar .env
-2. npm install
-3. npm run seed
-4. npm start
+- POST /api/login
+- POST /api/logout
+- GET /api/filmes?query=&ano=
+- POST /api/filmes
+- GET /api/health
 
-## Execução via Docker Compose
-docker compose build  
-docker compose up -d  
+## Subir Ambiente (Docker)
+
+```bash
+docker compose build
+docker compose up -d
+docker compose logs -f backend
+```
+
+## Testes Rápidos
+
+```bash
 curl http://localhost:3000/api/health
+curl -X POST http://localhost:3000/api/login -H 'Content-Type: application/json' -d '{"email":"user@example.com","senha":"senha123"}'
+```
 
-## Usuário Seed
-email: user@example.com  
-senha: senha123
+## Limpar
+
+```bash
+docker compose down
+docker compose down -v   # remove volumes e dados
+```
+
+## Checklist
+
+- [ ] Login funcionando (token JWT)
+- [ ] Logout revoga token
+- [ ] Busca protegida retorna resultados do banco
+- [ ] Inserção protegida grava no banco
+- [ ] Cache Redis ativo (origem cache em segunda busca)
+- [ ] Rate limit em /api/login
+- [ ] Helmet + compressão
+- [ ] Validações servidor (mensagens de erro)
+- [ ] Logging em coleção logs
+- [ ] SPA consumindo rotas do backend

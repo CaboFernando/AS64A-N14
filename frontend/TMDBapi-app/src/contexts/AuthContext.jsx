@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -41,7 +42,10 @@ export function AuthProvider({ children }) {
   async function logout() {
     try {
       if (token) await axios.post('/api/logout', null, { headers: { Authorization: `Bearer ${token}` } });
-    } catch {}
+    } catch (err) {
+      // Logout locally even if server request fails
+      console.warn('Logout request failed:', err.message);
+    }
     setToken(null);
     setUser(null);
   }

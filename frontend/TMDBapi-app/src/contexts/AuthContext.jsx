@@ -1,5 +1,12 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+
+// Configure axios base URL for production
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+if (API_BASE_URL) {
+  axios.defaults.baseURL = API_BASE_URL;
+}
 
 export const AuthContext = createContext();
 
@@ -35,7 +42,10 @@ export function AuthProvider({ children }) {
   async function logout() {
     try {
       if (token) await axios.post('/api/logout', null, { headers: { Authorization: `Bearer ${token}` } });
-    } catch {}
+    } catch (err) {
+      // Logout locally even if server request fails
+      console.warn('Logout request failed:', err.message);
+    }
     setToken(null);
     setUser(null);
   }

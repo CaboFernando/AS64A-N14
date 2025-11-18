@@ -6,32 +6,11 @@ import axios from "axios";
 
 export default function UploadForm() {
   const { state, dispatch } = useContext(AppContext);
-
-
-  const TMDB_API_KEY = "918b7457f690598a36b2e7149a395d29";
-  const API_BASE_URL = "https://api.themoviedb.org/3";
-
   const [query, setQuery] = useState("");
   const [releaseYear, setReleaseYear] = useState("");
 
-
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 35 }, (_, i) => currentYear - i).sort((a, b) => b - a);
-
-  const fetchMovies = async (endpoint, params) => {
-
-    const allParams = {
-      ...params,
-      api_key: TMDB_API_KEY,
-      language: "pt-BR",
-    };
-
-    const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
-      params: allParams,
-    });
-
-    return response.data.results;
-  };
 
   const validateSearchInput = (searchQuery) => {
     const trimmedQuery = searchQuery.trim();
@@ -42,10 +21,6 @@ export default function UploadForm() {
 
     if (trimmedQuery && trimmedQuery.length > 100) {
       return 'O título é muito longo (máximo 100 caracteres)';
-    }
-
-    if (trimmedQuery && !/[a-zA-ZÀ-ÿ]/.test(trimmedQuery)) {
-      return 'Digite um título válido com letras';
     }
 
     return null;
@@ -70,52 +45,45 @@ export default function UploadForm() {
 
     try {
       dispatch({ type: "UPLOAD_START" });
-      let results = [];
+      
+      // Build query params for backend
+      const params = {};
+      if (trimmedQuery) params.query = trimmedQuery;
+      if (trimmedYear) params.ano = trimmedYear;
 
-      if (trimmedQuery) {
-
-        const params = { query: trimmedQuery };
-        if (trimmedYear) {
-          params.primary_release_year = trimmedYear;
-        }
-
-        results = await fetchMovies("/search/movie", params);
-
-      } else if (trimmedYear) {
-
-        results = await fetchMovies("/discover/movie", {
-          primary_release_year: trimmedYear,
-          sort_by: "popularity.desc",
-        });
-      }
+      // Search from local backend
+      const response = await axios.get('/api/filmes', { params });
+      const results = response.data.resultados || [];
 
       if (results.length === 0) {
         dispatch({ type: "ERROR", payload: "Nenhum filme encontrado com os critérios fornecidos." });
       } else {
-
-        dispatch({ type: "SUCCESS", payload: results });
+        // Map backend results to match the expected format
+        const mappedResults = results.map(filme => ({
+          id: filme._id,
+          title: filme.titulo,
+          overview: filme.descricao,
+          release_date: filme.ano ? `${filme.ano}-01-01` : null,
+          vote_average: 0, // Not available in local data
+          poster_path: null // Not available in local data
+        }));
+        dispatch({ type: "SUCCESS", payload: mappedResults });
       }
 
     } catch (err) {
-
-      const apiErrorData = err.response?.data;
-      const errorMessage = apiErrorData?.status_message || apiErrorData?.message || "Falha na comunicação com a API de filmes.";
-
-      console.error("TMDB API Error Detail:", apiErrorData || err.message);
-
+      const errorMessage = err.response?.data?.error?.message || "Falha na comunicação com o backend.";
+      console.error("Backend API Error:", err.response?.data || err.message);
       dispatch({ type: "ERROR", payload: errorMessage });
     }
   };
 
   const isSearching = state.status === "uploading" || state.status === "processing";
-  const statusMessage = state.status === "uploading" ? "Buscando Títulos..." : "Processando Dados...";
-
-
+  const statusMessage = state.status === "uploading" ? "Buscando Filmes..." : "Processando Dados...";
 
   return (
     <Form onSubmit={handleSubmit} className="p-4 border rounded bg-white shadow-lg mx-auto" style={{ maxWidth: '700px' }}>
 
-      <h2 className="text-center mb-5 text-primary">Consulta de Filmes TMDB</h2>
+      <h2 className="text-center mb-5 text-primary">Busca de Filmes Locais</h2>
 
       {state.status === "error" && <Alert variant="danger">{state.error}</Alert>}
 

@@ -4,6 +4,13 @@ import { Card, ListGroup, Badge, Image } from "react-bootstrap";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
 
+
+const formatVoteAverage = (value) => {
+  const num = parseFloat(value);
+  return isNaN(num) ? 'N/A' : num.toFixed(1);
+};
+
+
 export default function ResultCard() {
   const { state } = useContext(AppContext);
 
@@ -19,11 +26,13 @@ export default function ResultCard() {
 
       <ListGroup variant="flush">
         {state.results.map((movie) => (
-          <ListGroup.Item key={movie.id} className="d-flex align-items-start p-3">
+          <ListGroup.Item key={movie._id || movie.id} className="d-flex align-items-start p-3">
 
+            {  }
+            
             <Image
               src={movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : 'https://placehold.co/80x120/E8E8E8/333?text=Sem+Poster'}
-              alt={`Poster de ${movie.title}`}
+              alt={`Poster de ${movie.title || movie.titulo}`}
               rounded
               style={{ width: '80px', height: '120px', objectFit: 'cover' }}
               className="me-3 flex-shrink-0"
@@ -31,16 +40,20 @@ export default function ResultCard() {
 
             <div className="flex-grow-1">
               <div className="d-flex justify-content-between align-items-start">
-                <h5>{movie.title}</h5>
+                {  }
+                <h5>{movie.titulo || movie.title || 'Título Desconhecido'}</h5>
+                
                 <Badge bg="success" className="ms-2 p-2">
-                  ⭐ {movie.vote_average.toFixed(1)}
+                  {  }
+                  ⭐ {formatVoteAverage(movie.vote_average || movie.ano)}
                 </Badge>
               </div>
               <p className="text-muted mb-1">
-                Lançamento: {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
+                {    }
+                Lançamento: {movie.ano || movie.release_date ? (new Date(movie.release_date).getFullYear() || movie.ano) : 'N/A'}
               </p>
               <p className="small">
-                {movie.overview || 'Nenhuma descrição disponível.'}
+                {movie.descricao || movie.overview || 'Nenhuma descrição disponível.'}
               </p>
             </div>
           </ListGroup.Item>

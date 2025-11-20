@@ -1,8 +1,14 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine AS build
 WORKDIR /app
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 COPY package.json package-lock.json* ./
-RUN npm install --omit=dev
-COPY src ./src
-EXPOSE 3000
-CMD ["node", "src/server.js"]
+RUN npm install
+COPY . .
+RUN npm run build # <-- A pasta 'dist' é gerada aqui
+
+FROM nginx:1.27-alpine AS prod
+COPY --from=build /app/dist /usr/share/nginx/html # <-- Apenas a pasta 'dist' é copiada
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/app.conf
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]

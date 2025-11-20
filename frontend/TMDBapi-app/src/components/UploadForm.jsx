@@ -7,31 +7,13 @@ import axios from "axios";
 export default function UploadForm() {
   const { state, dispatch } = useContext(AppContext);
 
-
-  const TMDB_API_KEY = "918b7457f690598a36b2e7149a395d29";
-  const API_BASE_URL = "https://api.themoviedb.org/3";
-
+  // Removidas as chaves da API TMDB, usando apenas o backend local
   const [query, setQuery] = useState("");
   const [releaseYear, setReleaseYear] = useState("");
 
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 35 }, (_, i) => currentYear - i).sort((a, b) => b - a);
-
-  const fetchMovies = async (endpoint, params) => {
-
-    const allParams = {
-      ...params,
-      api_key: TMDB_API_KEY,
-      language: "pt-BR",
-    };
-
-    const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
-      params: allParams,
-    });
-
-    return response.data.results;
-  };
 
   const validateSearchInput = (searchQuery) => {
     const trimmedQuery = searchQuery.trim();
@@ -42,10 +24,6 @@ export default function UploadForm() {
 
     if (trimmedQuery && trimmedQuery.length > 100) {
       return 'O título é muito longo (máximo 100 caracteres)';
-    }
-
-    if (trimmedQuery && !/[a-zA-ZÀ-ÿ]/.test(trimmedQuery)) {
-      return 'Digite um título válido com letras';
     }
 
     return null;
@@ -69,53 +47,51 @@ export default function UploadForm() {
     }
 
     try {
-      dispatch({ type: "UPLOAD_START" });
-      let results = [];
-
+      // Usar SEARCH_START conforme definido em appReducer.js
+      dispatch({ type: "SEARCH_START" }); 
+      
+      const params = {};
       if (trimmedQuery) {
-
-        const params = { query: trimmedQuery };
-        if (trimmedYear) {
-          params.primary_release_year = trimmedYear;
-        }
-
-        results = await fetchMovies("/search/movie", params);
-
-      } else if (trimmedYear) {
-
-        results = await fetchMovies("/discover/movie", {
-          primary_release_year: trimmedYear,
-          sort_by: "popularity.desc",
-        });
+        params.query = trimmedQuery;
+      }
+      if (trimmedYear) {
+        params.ano = trimmedYear;
       }
 
-      if (results.length === 0) {
-        dispatch({ type: "ERROR", payload: "Nenhum filme encontrado com os critérios fornecidos." });
-      } else {
+      // CHAMA A API LOCAL PROTEGIDA: GET /api/filmes
+      // O token JWT é enviado automaticamente pelo AuthContext via axios.defaults.headers
+      const response = await axios.get('/api/filmes', { params });
+      
+      // O backend retorna { origem, resultados: [...] }
+      const results = response.data.resultados || [];
 
+
+      if (results.length === 0) {
+        dispatch({ type: "ERROR", payload: "Nenhum filme encontrado com os critérios fornecidos no BD local." });
+      } else {
         dispatch({ type: "SUCCESS", payload: results });
       }
 
     } catch (err) {
 
-      const apiErrorData = err.response?.data;
-      const errorMessage = apiErrorData?.status_message || apiErrorData?.message || "Falha na comunicação com a API de filmes.";
+      const apiErrorData = err.response?.data?.error;
+      const errorMessage = apiErrorData?.message || "Falha na comunicação com a API local. Verifique se o backend está rodando (porta 3000).";
 
-      console.error("TMDB API Error Detail:", apiErrorData || err.message);
+      console.error("Local API Error Detail:", apiErrorData || err.message);
 
       dispatch({ type: "ERROR", payload: errorMessage });
     }
   };
 
-  const isSearching = state.status === "uploading" || state.status === "processing";
-  const statusMessage = state.status === "uploading" ? "Buscando Títulos..." : "Processando Dados...";
-
+  // Usar 'loading' conforme appReducer.js
+  const isSearching = state.status === "loading"; 
+  const statusMessage = isSearching ? "Buscando Títulos no BD local..." : "Aguardando Busca...";
 
 
   return (
     <Form onSubmit={handleSubmit} className="p-4 border rounded bg-white shadow-lg mx-auto" style={{ maxWidth: '700px' }}>
 
-      <h2 className="text-center mb-5 text-primary">Consulta de Filmes TMDB</h2>
+      <h2 className="text-center mb-5 text-primary">Consulta de Filmes (BD Local)</h2>
 
       {state.status === "error" && <Alert variant="danger">{state.error}</Alert>}
 
@@ -160,6 +136,7 @@ export default function UploadForm() {
         </Col>
       </Row>
 
+      {/* O Loader agora usa a condição de loading do AppContext */}
       {isSearching && <Loader message={statusMessage} />}
 
       <Button

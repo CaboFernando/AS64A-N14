@@ -34,10 +34,10 @@ services:
       MONGO_URI: mongodb://mongo:27017/as64a_n14
       JWT_SECRET: super_seguro_123
       REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_PORT: "6379"
     ports:
       - "3000:3000"
-    command: sh -c "node src/config/seed.js && node src/server.js"
+    #command: sh -c "node src/config/seed.js && node src/server.js"
 
   frontend:
     build:

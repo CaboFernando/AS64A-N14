@@ -37,7 +37,7 @@ services:
       REDIS_PORT: "6379"
     ports:
       - "3000:3000"
-    #command: sh -c "node src/config/seed.js && node src/server.js"
+    command: sh -c "node src/config/seed.js && node src/server.js"
 
   frontend:
     build:

@@ -14,8 +14,8 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   req.body = mongoSanitize(req.body);
-  req.query = mongoSanitize(req.query);
-  req.params = mongoSanitize(req.params);
+  mongoSanitize(req.query);
+  mongoSanitize(req.params);
   next();
 });
 

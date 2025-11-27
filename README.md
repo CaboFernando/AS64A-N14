@@ -1,102 +1,104 @@
-# AS64A-N14 – Projeto 2
+````markdown
+# Projeto 2 - Catálogo de Filmes Fullstack (AS64A)
 
-Este repositório entrega:
-- SPA React (TMDBapi-app) adaptada para Login, Busca e Inserção em dados locais.
-- Backend Express (REST) com MongoDB e Redis (cache + revogação de tokens).
-- Segurança: JWT, hashing de senha, rate limit, helmet, validação servidor.
-- Otimização: compressão, cache, estrutura REST.
-- Execução via Docker Compose ou local.
+Aplicação Web completa desenvolvida para a disciplina de **Programação Web Fullstack**. O sistema implementa uma arquitetura de 3 camadas segura e otimizada, permitindo autenticação de usuários, busca e catalogação de filmes.
 
-## Serviços
+## 🚀 Tecnologias e Arquitetura
 
-| Serviço   | Porta | Função                    |
-|-----------|-------|---------------------------|
-| backend   | 3000  | API REST (login, filmes)  |
-| frontend  | 8080  | SPA (Nginx)               |
-| mongo     | 27017 | Banco de dados            |
-| redis     | 6379  | Cache / revogação tokens  |
+O projeto foi orquestrado utilizando **Docker Compose** e segue a seguinte estrutura:
 
-## Endpoints Principais
+* **Frontend (SPA):** React.js (Vite) + Bootstrap. Servido via **Nginx**.
+* **Backend (API REST):** Node.js + Express 5.
+* **Banco de Dados:** MongoDB (com persistência via volumes).
+* **Cache/Sessão:** Redis (gerenciamento de *blacklist* de tokens).
 
-- POST /api/login
-- POST /api/logout
-- GET /api/filmes?query=&ano=
-- POST /api/filmes
-- GET /api/health
+## 📋 Funcionalidades Implementadas
 
-## Subir Ambiente (Docker)
+### Requisitos Funcionais
+1.  **Login:** Autenticação via JWT (JSON Web Token).
+2.  **Busca:** Pesquisa de filmes por título e ano (dados locais do MongoDB).
+3.  **Inserção:** Cadastro de novos filmes (protegido por autenticação).
 
-```bash
-sudo docker compose build
-sudo docker compose up -d
-sudo docker compose logs -f backend
+### Requisitos Não-Funcionais (Segurança e Performance)
+* 🔒 **HTTPS (TLS/SSL):** Configurado no Nginx com certificados autoassinados (Porta 8443).
+* 🛡️ **Proteção contra Injeção (NoSQL Injection):** Sanitização automática de `req.body`, `req.query` e `req.params` utilizando `mongo-sanitize`.
+* 🤖 **Rate Limiting:** Proteção contra ataques de força bruta na rota de login (10 tentativas/15min).
+* 🚪 **Logout Seguro:** Revogação real de tokens utilizando *blacklist* no Redis.
+* 📝 **Auditoria:** Logs de segurança (tentativas de login, inserções) registrados no banco.
+* 🚀 **Compressão (Gzip):**
+    * **Frontend:** Arquivos estáticos comprimidos no *build* (Vite) e servidos via `gzip_static` no Nginx.
+    * **Backend:** Respostas da API comprimidas via middleware `compression`.
+* 🔌 **Connection Pooling:** Gerenciamento eficiente de conexões MongoDB.
+
+## 🛠️ Como Executar
+
+### Pré-requisitos
+* Docker
+* Docker Compose
+
+### Passo a Passo
+
+1. **Clone o repositório e acesse a pasta:**
+   ```bash
+   git clone https://github.com/CaboFernando/AS64A-N14
+   cd AS64A-N14
+````
+
+2.  **Suba o ambiente (Build + Start):**
+
+    ```bash
+    docker-compose up --build
+    ```
+
+3.  **Acesse a aplicação:**
+
+      * Abra o navegador em: **[https://localhost:8443](https://www.google.com/search?q=https://localhost:8443)**
+      * *Nota:* Como o certificado é autoassinado (ambiente de dev), o navegador exibirá um alerta de segurança. Clique em "Avançado" -\> "Ir para localhost (inseguro)".
+
+### 🔑 Credenciais de Teste (Seed)
+
+O sistema cria automaticamente um usuário padrão ao iniciar:
+
+  * **Email:** `user@example.com`
+  * **Senha:** `senha123`
+
+-----
+
+## 📂 Estrutura do Projeto
+
+```
+/
+├── backend/
+│   ├── src/
+│   │   ├── config/       # Configs de DB, Redis, Segurança
+│   │   ├── models/       # Schemas Mongoose (Usuario, Filme, Log)
+│   │   ├── routes/       # Rotas e Controladores (Auth, Filmes)
+│   │   └── app.js        # Configuração do Express (Middlewares)
+│   └── Dockerfile
+│
+├── frontend/TMDBapi-app/
+│   ├── src/              # Componentes React, Contexts
+│   ├── nginx.conf        # Configuração do Proxy Reverso e HTTPS
+│   ├── vite.config.js    # Configuração de Build e Compressão
+│   └── Dockerfile
+│
+├── certs/                # Certificados SSL para o Nginx
+└── docker-compose.yml    # Orquestração dos serviços
 ```
 
-## Testes Rápidos
+## ✅ Endpoints da API (Backend)
 
-```bash
-curl http://localhost:3000/api/health
-curl -X POST http://localhost:3000/api/login -H 'Content-Type: application/json' -d '{"email":"user@example.com","senha":"senha123"}'
+A API roda internamente na porta 3000, mas é exposta pelo Nginx via proxy.
+
+  * `POST /api/login` - Autenticação.
+  * `POST /api/logout` - Revogação de token.
+  * `GET /api/filmes` - Busca (Query params: `query`, `ano`).
+  * `POST /api/filmes` - Inserção.
+  * `GET /api/health` - Check de saúde.
+
+-----
+
+**Autores:** Carlos Fernando dos Santos & André Faria
+
 ```
-
-## Limpar
-
-```bash
-sudo docker compose down
-sudo docker compose down -v   # remove volumes e dados
-```
-
-## Checklist
-
-- [ ] Login funcionando (token JWT)
-- [ ] Logout revoga token
-- [ ] Busca protegida retorna resultados do banco
-- [ ] Inserção protegida grava no banco
-- [ ] Cache Redis ativo (origem cache em segunda busca)
-- [ ] Rate limit em /api/login
-- [ ] Helmet + compressão
-- [ ] Validações servidor (mensagens de erro)
-- [ ] Logging em coleção logs
-- [ ] SPA consumindo rotas do backend
-
-
-✅ Status Final e Correções de Execução
-
-- O projeto está completo, estável e totalmente funcional, seguindo a arquitetura de 3 camadas:
-
-- Front-end: React
-
-- Back-end: Express
-
-- Banco/Cache: MongoDB + Redis
-
-- Orquestração: Docker Compose
-
-🔧 Alterações Principais
-1. Infraestrutura e Login
-
-- O arquivo frontend/TMDBapi-app/nginx.conf foi reescrito totalmente em ASCII, removendo caracteres inválidos que impediam o Nginx de iniciar.
-
-- Adicionado o bloco:
-```bash
-location /api/ {
-    proxy_pass http://backend:3000;
-}
-```
-
-2. Front-end e Build
-
-- Ponto de Entrada Criado:
-Adicionado src/main.jsx com createRoot, garantindo a inicialização correta do React 18.
-
-- Importações Ajustadas:
-Todos os caminhos incorretos ../context/ foram corrigidos para ../contexts/.
-
-- Bootstrap Removido do Build e Movido para CDN:
-Adicionado diretamente no index.html para evitar erros no processo de build.
-
-- Busca Interna Corrigida:
-O arquivo UploadForm.jsx agora utiliza a rota local:
-```bash
-/api/filmes
 ```

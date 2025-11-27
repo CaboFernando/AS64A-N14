@@ -48,7 +48,10 @@ services:
     depends_on:
       - backend
     ports:
-      - "8080:8080"
+      - "8080:80"   # Redirecionamento HTTP (opcional)
+      - "8443:443"  # Porta HTTPS
+    volumes:
+    - ./certs:/etc/nginx/certs
 
 volumes:
   mongo_data:

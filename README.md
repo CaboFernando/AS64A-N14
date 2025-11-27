@@ -38,16 +38,16 @@ O projeto foi orquestrado utilizando **Docker Compose** e segue a seguinte estru
 ### Passo a Passo
 
 1. **Clone o repositório e acesse a pasta:**
-   ```bash
-   git clone https://github.com/CaboFernando/AS64A-N14
-   cd AS64A-N14
-````
+   ``bash
+        git clone https://github.com/CaboFernando/AS64A-N14
+        cd AS64A-N14
+    ``
 
 2.  **Suba o ambiente (Build + Start):**
 
-    ```bash
-    docker-compose up --build
-    ```
+    ``bash
+        docker-compose up --build
+    ``
 
 3.  **Acesse a aplicação:**
 

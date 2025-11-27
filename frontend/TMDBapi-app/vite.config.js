@@ -4,5 +4,4 @@ import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig({
   plugins: [react(), viteCompression()],
-  //base: '/AS64A-N14-FRONT/TMDBapi-app/',
 })

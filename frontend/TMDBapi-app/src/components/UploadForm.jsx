@@ -7,7 +7,6 @@ import axios from "axios";
 export default function UploadForm() {
   const { state, dispatch } = useContext(AppContext);
 
-  // Removidas as chaves da API TMDB, usando apenas o backend local
   const [query, setQuery] = useState("");
   const [releaseYear, setReleaseYear] = useState("");
 
@@ -47,7 +46,6 @@ export default function UploadForm() {
     }
 
     try {
-      // Usar SEARCH_START conforme definido em appReducer.js
       dispatch({ type: "SEARCH_START" }); 
       
       const params = {};
@@ -58,11 +56,8 @@ export default function UploadForm() {
         params.ano = trimmedYear;
       }
 
-      // CHAMA A API LOCAL PROTEGIDA: GET /api/filmes
-      // O token JWT é enviado automaticamente pelo AuthContext via axios.defaults.headers
       const response = await axios.get('/api/filmes', { params });
       
-      // O backend retorna { origem, resultados: [...] }
       const results = response.data.resultados || [];
 
 
@@ -83,7 +78,6 @@ export default function UploadForm() {
     }
   };
 
-  // Usar 'loading' conforme appReducer.js
   const isSearching = state.status === "loading"; 
   const statusMessage = isSearching ? "Buscando Títulos no BD local..." : "Aguardando Busca...";
 
@@ -136,7 +130,6 @@ export default function UploadForm() {
         </Col>
       </Row>
 
-      {/* O Loader agora usa a condição de loading do AppContext */}
       {isSearching && <Loader message={statusMessage} />}
 
       <Button

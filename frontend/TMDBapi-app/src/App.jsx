@@ -1,6 +1,6 @@
 import React from 'react';
 import { AuthProvider } from './contexts/AuthContext';
-import { AppProvider } from './contexts/AppProvider'; // Importa AppProvider
+import { AppProvider } from './contexts/AppProvider';
 import Login from './Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import UploadForm from './components/UploadForm'; 

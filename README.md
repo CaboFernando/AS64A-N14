@@ -1,4 +1,3 @@
-````markdown
 # Projeto 2 - Catálogo de Filmes Fullstack (AS64A)
 
 Aplicação Web completa desenvolvida para a disciplina de **Programação Web Fullstack**. O sistema implementa uma arquitetura de 3 camadas segura e otimizada, permitindo autenticação de usuários, busca e catalogação de filmes.
@@ -99,6 +98,3 @@ A API roda internamente na porta 3000, mas é exposta pelo Nginx via proxy.
 -----
 
 **Autores:** Carlos Fernando dos Santos & André Faria
-
-```
-```

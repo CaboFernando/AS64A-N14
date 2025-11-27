@@ -27,9 +27,9 @@ Este repositório entrega:
 ## Subir Ambiente (Docker)
 
 ```bash
-docker compose build
-docker compose up -d
-docker compose logs -f backend
+sudo docker compose build
+sudo docker compose up -d
+sudo docker compose logs -f backend
 ```
 
 ## Testes Rápidos
@@ -42,8 +42,8 @@ curl -X POST http://localhost:3000/api/login -H 'Content-Type: application/json'
 ## Limpar
 
 ```bash
-docker compose down
-docker compose down -v   # remove volumes e dados
+sudo docker compose down
+sudo docker compose down -v   # remove volumes e dados
 ```
 
 ## Checklist
@@ -73,7 +73,7 @@ docker compose down -v   # remove volumes e dados
 - Orquestração: Docker Compose
 
 🔧 Alterações Principais
-1. Infraestrutura e Login (Erro 405 Resolvido)
+1. Infraestrutura e Login
 
 - O arquivo frontend/TMDBapi-app/nginx.conf foi reescrito totalmente em ASCII, removendo caracteres inválidos que impediam o Nginx de iniciar.
 
@@ -84,7 +84,7 @@ location /api/ {
 }
 ```
 
-2. Front-end e Build (Tela em Branco Corrigida)
+2. Front-end e Build
 
 - Ponto de Entrada Criado:
 Adicionado src/main.jsx com createRoot, garantindo a inicialização correta do React 18.

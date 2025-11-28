@@ -71,6 +71,15 @@ router.post('/filmes', auth, async (req, res) => {
       ano: anoNum,
       criadoPor: req.userId
     });
+    
+    
+    const searchKeys = await redisClient.keys('search:*');
+    if (searchKeys.length > 0) {
+      await redisClient.del(searchKeys);
+      await registrarLog('CACHE_INVALIDATION', req.userId, { deleted_keys: searchKeys.length });
+    }
+
+    
     await registrarLog('INSERT_FILME', req.userId, { filmeId: novo._id, titulo });
     return res.status(201).json({
       id: novo._id,

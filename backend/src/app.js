@@ -6,11 +6,15 @@ import routes from './routes/index.js';
 import { initRedis } from './config/cache.config.js';
 import { security } from './config/security.config.js';
 import mongoSanitize from 'mongo-sanitize';
+import {xss} from 'express-xss-sanitizer';
 
 const app = express();
 app.use(helmet());
 app.use(compression());
 app.use(express.json());
+
+app.set('trust proxy', 1);
+app.use(xss());
 
 app.use((req, res, next) => {
   req.body = mongoSanitize(req.body);

@@ -36,7 +36,10 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: "6379"
     ports:
-      - "3000:3000"
+      - "3000:3000" # Redirecionamento HTTP (opcional)
+      - "3443:3443" # Porta HTTPS
+    volumes:
+      - ./certs:/app/certs
     command: sh -c "node src/config/seed.js && node src/server.js"
 
   frontend:
